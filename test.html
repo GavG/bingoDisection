@@ -22,19 +22,47 @@
             canvas = document.getElementById('c'),
             ctx = canvas.getContext('2d')
 
-        var cellSize = 31.6
+        var cellWidth = 31.6
+        var cellHeight = 31.5
         var cellBorderWidth = 2.8
+
+        var topCardY = 87.8
+        var cardGapY = 18.7
 
         var cards = {
             card1: {
                 offsetX: 7.5,
-                offsetY: 87.8,
+                offsetY: topCardY,
                 cells: [],
             },
 
             card2: {
                 offsetX: 7.5,
-                offsetY: 106.5 + (cellSize * 3),
+                offsetY: topCardY + cardGapY + (cellHeight * 3),
+                cells: [],
+            },
+
+            card3: {
+                offsetX: 7.5,
+                offsetY: topCardY + (cardGapY * 2) + (cellHeight * 6),
+                cells: [],
+            },
+
+            card4: {
+                offsetX: 7.5,
+                offsetY: topCardY + (cardGapY * 3) + (cellHeight * 9),
+                cells: [],
+            },
+
+            card5: {
+                offsetX: 7.5,
+                offsetY: topCardY + (cardGapY * 4) + (cellHeight * 12),
+                cells: [],
+            },
+
+            card6: {
+                offsetX: 7.5,
+                offsetY: topCardY + (cardGapY * 5) + (cellHeight * 15),
                 cells: [],
             }
         }
@@ -56,12 +84,12 @@
 
                 //Rows
                 for (var r = 0; r < 3; r++) {
-                    let cellOffsetY = (cellSize * r) - cellBorderWidth
+                    let cellOffsetY = (cellHeight * r) - cellBorderWidth
 
                     //Cells
                     for (var c = 0; c < 9; c++) {
-                        let cellOffsetX = cellSize * c
-                        ctx.drawImage(image, card.offsetX + cellOffsetX + cellBorderWidth, card.offsetY + cellOffsetY + cellBorderWidth, cellSize - cellBorderWidth, cellSize - cellBorderWidth, 0, 0, 100, 100)
+                        let cellOffsetX = cellWidth * c
+                        ctx.drawImage(image, card.offsetX + cellOffsetX + cellBorderWidth, card.offsetY + cellOffsetY + cellBorderWidth, cellWidth - cellBorderWidth, cellHeight - cellBorderWidth, 0, 0, 100, 100)
 
                         let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
 
