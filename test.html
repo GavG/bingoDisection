@@ -9,6 +9,10 @@
         img {
             margin: 1px;
         }
+        p {
+            white-space: nowrap;
+            margin-right: 10px;
+        }
     </style>
 
 </head>
@@ -89,12 +93,18 @@
             await worker.loadLanguage('eng');
             await worker.initialize('eng');
 
+            let cardNo = 0
+
             for (var cardId in cards) {
                 let card = cards[cardId]
 
                 let h = document.createElement('h1')
                 h.textContent = cardId
                 document.body.append(h)
+
+                let d = document.createElement('div')
+                d.style.display = 'flex'
+                document.body.append(d)
 
                 //Rows
                 for (var r = 0; r < 3; r++) {
@@ -115,24 +125,29 @@
 
                         cellImg.src = imgSrc
 
-                        document.body.append(cellImg)
-
-
-                        let p = document.createElement('input')
-
                         let res = await recognize(cellImg)
 
-                        p.value = res
+                        if(res){
+                            d.parentNode.insertBefore(cellImg, d)
 
-                        document.body.append(p)
-                        document.body.append(document.createElement('br'))
+                            let p = document.createElement('p')
+
+                            p.innerHTML = `${res}:[${(9 * 3 * cardNo) + (r * 9) + c}]`
+
+                            d.append(p)
+                        }
 
                     }
 
-                    document.body.append(document.createElement('hr'))
+                    d = document.createElement('div')
+                    d.style.display = 'flex'
+                    document.body.append(d)
 
                 }
 
+                document.body.append(document.createElement('br'))
+
+                cardNo += 1
 
             }
 
