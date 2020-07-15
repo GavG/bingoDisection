@@ -1,11 +1,29 @@
 window.addEventListener('load', run)
 
+var num = ''
+var num_map = {}
+
+var elem = null
+var sp = null
+var sp_count = null
+
 function run() {
+
+    elem = document.getElementById('loader-holder')
+
+    sp = document.createElement('H1')
+
+    sp.innerText = 'Analysing bingo cards please wait...'
+
+    sp_count = document.createElement('H2')
+
+    elem.parentNode.insertBefore(sp, elem)
+    sp.parentNode.insertBefore(sp_count, sp)
 
     let imageUrl = document.getElementById('bingo-holder').style.backgroundImage.slice(4, -1).replace(/"/g, "")
 
     console.log(imageUrl)
-    
+
     chrome.runtime.sendMessage(
         { message: "convert_image_url_to_data_url", url: imageUrl },
         function (response) {
@@ -112,7 +130,8 @@ function bingo(imageUrl) {
                     let res = await recognize(cellImg)
 
                     if (res) {
-                        console.log(`${res}:[${(9 * 3 * cardNo) + (r * 9) + c}]`)
+                        num_map[res.replace(/(\r\n|\n|\r)/gm, "")] = (27 * cardNo) + (r * 9) + c
+                        sp_count.innerHTML = parseInt(sp_count.innerHTML || 0) + 1
                     }
 
                 }
@@ -123,6 +142,8 @@ function bingo(imageUrl) {
 
         }
 
+        loaded_nums()
+
     }
 
     async function recognize(img) {
@@ -132,4 +153,40 @@ function bingo(imageUrl) {
 
         return result.data.text
     }
+
+    function loaded_nums()
+    {
+        sp_count.style.display = 'none'
+        sp.innerHTML = 'Bingo cards have been parsed, you can now type numbers followed by enter to dab'
+
+        document.addEventListener('keypress', function(event){
+            if (Number.isInteger(parseInt(event.key))){
+                set_num(event.key)
+            }
+
+            if (event.key == 'Enter' && num){
+                submit_num()
+            }
+        })
+    }
+
+    function set_num(new_num) {
+        console.log('setNum', new_num)
+        if(num.length < 2){
+            num = `${num}${new_num}`
+        }
+    }
+
+    function submit_num() {
+        console.log('submit', num)
+        console.log(num_map)
+        let cross_pos = num_map[num]
+        if (cross_pos){
+            let cross = document.getElementsByClassName('cross')[cross_pos]
+            console.log(cross)
+            cross.style.opacity = cross.style.opacity == "0" ? "1" : "0"
+            num = ''
+        }
+    }
+
 }
