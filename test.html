@@ -153,13 +153,13 @@
 
         }
 
-            async function recognize(img) {
-                result = await worker.recognize(img, 'eng', {
-                tessedit_char_whitelist: '0123456789'
-            });
+        async function recognize(img) {
+            result = await worker.recognize(img, 'eng', {
+            tessedit_char_whitelist: '0123456789'
+        });
 
-                return result.data.text
-            }
+            return result.data.text
+        }
 
     </script>
 
