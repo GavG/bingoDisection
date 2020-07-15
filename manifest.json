@@ -1,0 +1,26 @@
+  {
+    "name": "Easy NF Bingo Dabber",
+    "version": "1.0",
+    "description": "Type to dab",
+    "manifest_version": 2,
+    "permissions": [
+        "tabs",
+        "https://mfbc.us/*",
+        "https://myfreebingocards.com/p/*/*/*"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://mfbc.us/*"
+            ],
+            "js": [
+                "tesseract.js",
+                "bingo.js"
+            ]
+        }
+    ],
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": true
+    }
+  }
