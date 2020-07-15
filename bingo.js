@@ -179,14 +179,12 @@ function bingo(imageUrl) {
 
     function submit_num() {
         console.log('submit', num)
-        console.log(num_map)
         let cross_pos = num_map[num]
         if (cross_pos){
             let cross = document.getElementsByClassName('cross')[cross_pos]
-            console.log(cross)
             cross.style.opacity = cross.style.opacity == "0" ? "1" : "0"
-            num = ''
         }
+        num = ''
     }
 
 }
