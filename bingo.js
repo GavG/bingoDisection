@@ -3,22 +3,31 @@ window.addEventListener('load', run)
 var num = ''
 var num_map = {}
 
-var elem = null
 var sp = null
 var sp_count = null
+var popover = null
 
 function run() {
 
-    elem = document.getElementById('loader-holder')
+    popover = document.createElement('div')
+
+    popover.classList.add('popover')
 
     sp = document.createElement('H1')
 
     sp.innerText = 'Analysing bingo cards please wait...'
 
-    sp_count = document.createElement('H2')
+    sp_count = document.createElement('progress')
 
-    elem.parentNode.insertBefore(sp, elem)
-    sp.parentNode.insertBefore(sp_count, sp)
+    sp_count.value = 0
+
+    sp_count.max = 90
+
+    popover.appendChild(sp)
+
+    popover.appendChild(sp_count)
+
+    document.body.appendChild(popover)
 
     let imageUrl = document.getElementById('bingo-holder').style.backgroundImage.slice(4, -1).replace(/"/g, "")
 
@@ -99,9 +108,12 @@ function bingo(imageUrl) {
 
     async function processCards() {
 
-        await worker.load();
-        await worker.loadLanguage('eng');
-        await worker.initialize('eng');
+        await worker.load()
+        await worker.loadLanguage('eng')
+        await worker.initialize('eng')
+        await worker.setParameters({
+            tessedit_char_whitelist: "0123456789",
+        })
 
         let cardNo = 0
 
@@ -117,21 +129,14 @@ function bingo(imageUrl) {
                     let cellOffsetX = (cellWidth + cellBorderWidth) * c
                     ctx.drawImage(image, cardOffsetX + cellOffsetX + cellStartPadding, card.offsetY + cellOffsetY + cellBorderHeight, cellWidth - cellEndPadding, cellHeight - cellBorderHeight, 0, 0, cellWidth / 2, cellHeight / 2)
 
-                    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+                    sharpen(ctx, canvas.width, canvas.height, 1)
 
-                    let data = imageData.data
-
-                    let cellImg = new Image()
-
-                    let imgSrc = canvas.toDataURL()
-
-                    cellImg.src = imgSrc
-
-                    let res = await recognize(cellImg)
+                    let res = await recognize(canvas)
 
                     if (res) {
                         num_map[res.replace(/(\r\n|\n|\r)/gm, "")] = (27 * cardNo) + (r * 9) + c
-                        sp_count.innerHTML = parseInt(sp_count.innerHTML || 0) + 1
+                        sp_count.value = sp_count.value + 1
+                        sp_count.innerText = sp_count.value + ' / 90'
                     }
 
                 }
@@ -147,10 +152,7 @@ function bingo(imageUrl) {
     }
 
     async function recognize(img) {
-        result = await worker.recognize(img, 'eng', {
-            tessedit_char_whitelist: '0123456789'
-        });
-
+        result = await worker.recognize(img)
         return result.data.text
     }
 
@@ -185,6 +187,54 @@ function bingo(imageUrl) {
             cross.style.opacity = cross.style.opacity == "0" ? "1" : "0"
         }
         num = ''
+    }
+
+    function sharpen(ctx, w, h, mix) {
+        var x, sx, sy, r, g, b, a, dstOff, srcOff, wt, cx, cy, scy, scx,
+            weights = [0, -1, 0, -1, 5, -1, 0, -1, 0],
+            katet = Math.round(Math.sqrt(weights.length)),
+            half = (katet * 0.5) | 0,
+            dstData = ctx.createImageData(w, h),
+            dstBuff = dstData.data,
+            srcBuff = ctx.getImageData(0, 0, w, h).data,
+            y = h;
+
+        while (y--) {
+            x = w;
+            while (x--) {
+                sy = y;
+                sx = x;
+                dstOff = (y * w + x) * 4;
+                r = 0;
+                g = 0;
+                b = 0;
+                a = 0;
+
+                for (cy = 0; cy < katet; cy++) {
+                    for (cx = 0; cx < katet; cx++) {
+                        scy = sy + cy - half;
+                        scx = sx + cx - half;
+
+                        if (scy >= 0 && scy < h && scx >= 0 && scx < w) {
+                            srcOff = (scy * w + scx) * 4;
+                            wt = weights[cy * katet + cx];
+
+                            r += srcBuff[srcOff] * wt;
+                            g += srcBuff[srcOff + 1] * wt;
+                            b += srcBuff[srcOff + 2] * wt;
+                            a += srcBuff[srcOff + 3] * wt;
+                        }
+                    }
+                }
+
+                dstBuff[dstOff] = r * mix + srcBuff[dstOff] * (1 - mix);
+                dstBuff[dstOff + 1] = g * mix + srcBuff[dstOff + 1] * (1 - mix);
+                dstBuff[dstOff + 2] = b * mix + srcBuff[dstOff + 2] * (1 - mix);
+                dstBuff[dstOff + 3] = srcBuff[dstOff + 3];
+            }
+        }
+
+        ctx.putImageData(dstData, 0, 0);
     }
 
 }

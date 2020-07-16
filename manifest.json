@@ -13,6 +13,9 @@
             "matches": [
                 "https://mfbc.us/*"
             ],
+            "css": [
+                "bingo.css"
+            ],
             "js": [
                 "tesseract.js",
                 "bingo.js"
