@@ -2,14 +2,11 @@
 
     position: fixed;
     top: 10px;
-    width: 70%;
     backdrop-filter: blur(10px);
     background-color: rgba(255, 255, 255, 0.5);
     border-radius: 10px;
     padding: 10px;
     margin: auto;
-    left: 0;
-    right: 0;
 
 }
 
