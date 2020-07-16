@@ -31,8 +31,6 @@ function run() {
 
     let imageUrl = document.getElementById('bingo-holder').style.backgroundImage.slice(4, -1).replace(/"/g, "")
 
-    console.log(imageUrl)
-
     chrome.runtime.sendMessage(
         { message: "convert_image_url_to_data_url", url: imageUrl },
         function (response) {
@@ -159,7 +157,8 @@ function bingo(imageUrl) {
         sp_count.style.display = 'none'
         sp.innerHTML = 'Bingo cards have been analysed, you can now type numbers followed by enter to dab'
 
-        document.addEventListener('keypress', function(event){
+        document.addEventListener('keydown', function(event){
+
             if (Number.isInteger(parseInt(event.key))){
                 set_num(event.key)
             }
@@ -167,19 +166,30 @@ function bingo(imageUrl) {
             if (event.key == 'Enter' && num){
                 submit_num()
             }
+
+            if (event.code == 'Backspace'){
+                unset_last_num()
+            }
         })
     }
 
+    function unset_last_num() {
+        if (num.length) {
+            num = num.substr(0, -1)
+            sp.innerText = num
+            if(!num.length) sp.style.display = 'none'
+        }
+    }
+
     function set_num(new_num) {
-        console.log('setNum', new_num)
         if(num.length < 2){
             num = `${num}${new_num}`
             sp.innerText = num
+            sp.style.display = 'block'
         }
     }
 
     function submit_num() {
-        console.log('submit', num)
         let cross_pos = num_map[num]
         if (cross_pos){
             let cross = document.getElementsByClassName('cross')[cross_pos]
@@ -187,5 +197,6 @@ function bingo(imageUrl) {
         }
         num = ''
         sp.innerText = num
+        sp.style.display = 'none'
     }
 }
